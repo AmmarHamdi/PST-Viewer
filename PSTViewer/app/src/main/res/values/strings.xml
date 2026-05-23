@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PST Viewer</string>
+    <string name="folders">Folders</string>
+    <string name="emails">Emails</string>
+    <string name="email_detail">Message</string>
+    <string name="open_pst">Open PST File</string>
+    <string name="browse_archive">Browse Archive</string>
+    <string name="no_file_loaded">No file loaded</string>
+    <string name="no_folders">No folders found</string>
+    <string name="no_messages">No messages in this folder</string>
+    <string name="no_subject">(no subject)</string>
+    <string name="unknown_sender">Unknown sender</string>
+    <string name="empty_message">(empty message)</string>
+    <string name="loading_folders">Loading folders…</string>
+    <string name="loading_messages">Loading messages…</string>
+    <string name="open_with">Open with</string>
+</resources>
