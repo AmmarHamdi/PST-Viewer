@@ -1,0 +1,6 @@
+# Gradle build cache (not needed in version control)
+PSTViewer/.gradle/
+PSTViewer/app/build/
+
+# Local properties
+PSTViewer/local.properties
