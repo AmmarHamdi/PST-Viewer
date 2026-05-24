@@ -75,7 +75,7 @@ public class PSTRepository {
     }
 
     // ---------------------------------------------------------------------------
-    // Helper: load all messages from a folder into a list
+    // Helper: load all messages from a folder, sorted newest-first by default
     // ---------------------------------------------------------------------------
     public static List<PSTMessage> loadMessages(PSTFolder folder) {
         List<PSTMessage> messages = new ArrayList<>();
@@ -90,6 +90,16 @@ public class PSTRepository {
         } catch (Exception e) {
             // partial results are fine
         }
+        // Sort newest first by default
+        messages.sort((a, b) -> {
+            java.util.Date da, db;
+            try { da = a.getMessageDeliveryTime(); } catch (Exception e) { da = null; }
+            try { db = b.getMessageDeliveryTime(); } catch (Exception e) { db = null; }
+            if (da == null && db == null) return 0;
+            if (da == null) return 1;   // nulls last
+            if (db == null) return -1;
+            return db.compareTo(da);    // newest first
+        });
         return messages;
     }
 
