@@ -12,7 +12,8 @@
     <string name="no_subject">(no subject)</string>
     <string name="unknown_sender">Unknown sender</string>
     <string name="empty_message">(empty message)</string>
-    <string name="loading_folders">Loading folders…</string>
+    <string name="search_folders">Search folders…</string>
+    <string name="no_folders_found">No folders match your search</string>
     <string name="loading_messages">Loading messages…</string>
     <string name="open_with">Open with</string>
 </resources>
