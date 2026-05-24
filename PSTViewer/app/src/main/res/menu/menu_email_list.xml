@@ -5,13 +5,23 @@
     <item
         android:id="@+id/action_sort"
         android:title="@string/sort"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
-        app:showAsAction="ifRoom">
+        app:showAsAction="always|withText">
         <menu>
-            <item android:id="@+id/sort_date_desc" android:title="@string/sort_newest_first" />
-            <item android:id="@+id/sort_date_asc"  android:title="@string/sort_oldest_first" />
-            <item android:id="@+id/sort_sender"    android:title="@string/sort_sender" />
-            <item android:id="@+id/sort_subject"   android:title="@string/sort_subject" />
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/sort_date_desc"
+                    android:title="@string/sort_newest_first"
+                    android:checked="true" />
+                <item
+                    android:id="@+id/sort_date_asc"
+                    android:title="@string/sort_oldest_first" />
+                <item
+                    android:id="@+id/sort_sender"
+                    android:title="@string/sort_sender" />
+                <item
+                    android:id="@+id/sort_subject"
+                    android:title="@string/sort_subject" />
+            </group>
         </menu>
     </item>
 

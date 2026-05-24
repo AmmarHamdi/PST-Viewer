@@ -93,6 +93,10 @@ public class EmailListActivity extends AppCompatActivity implements EmailAdapter
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_email_list, menu);
+        MenuItem sortItem = menu.findItem(R.id.sort_date_desc);
+        if (sortItem != null) {
+            sortItem.setChecked(true);
+        }
         return true;
     }
 
@@ -198,18 +202,22 @@ public class EmailListActivity extends AppCompatActivity implements EmailAdapter
             onBackPressed();
             return true;
         } else if (id == R.id.sort_date_desc) {
+            item.setChecked(true);
             currentSort = SortOrder.DATE_DESC;
             applyFilterAndSort();
             return true;
         } else if (id == R.id.sort_date_asc) {
+            item.setChecked(true);
             currentSort = SortOrder.DATE_ASC;
             applyFilterAndSort();
             return true;
         } else if (id == R.id.sort_sender) {
+            item.setChecked(true);
             currentSort = SortOrder.SENDER;
             applyFilterAndSort();
             return true;
         } else if (id == R.id.sort_subject) {
+            item.setChecked(true);
             currentSort = SortOrder.SUBJECT;
             applyFilterAndSort();
             return true;

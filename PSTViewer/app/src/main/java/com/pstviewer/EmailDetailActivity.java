@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +27,8 @@ import com.pff.PSTMessage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -32,6 +37,10 @@ public class EmailDetailActivity extends AppCompatActivity {
 
     private static final SimpleDateFormat DATE_FMT =
             new SimpleDateFormat("EEEE, MMMM dd, yyyy 'at' HH:mm", Locale.getDefault());
+
+    private WebView webView;
+    private WebView printWebView;
+    private PSTMessage currentMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +56,8 @@ public class EmailDetailActivity extends AppCompatActivity {
         PSTMessage message = EmailListActivity.getCurrentMessage();
         if (message == null) { finish(); return; }
 
+        currentMessage = message;
+        webView = findViewById(R.id.webViewBody);
         populateViews(message);
     }
 
@@ -57,7 +68,6 @@ public class EmailDetailActivity extends AppCompatActivity {
         TextView tvCc      = findViewById(R.id.tvCc);
         TextView tvDate    = findViewById(R.id.tvDate);
         LinearLayout llAttachments = findViewById(R.id.llAttachments);
-        WebView webView    = findViewById(R.id.webViewBody);
 
         try {
             // Subject
@@ -230,8 +240,219 @@ public class EmailDetailActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_email_detail, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) { onBackPressed(); return true; }
+        int id = item.getItemId();
+        if (id == android.R.id.home) { onBackPressed(); return true; }
+        if (id == R.id.action_print) { printEmail(); return true; }
+        if (id == R.id.export_share_text) { shareEmailAsText(); return true; }
+        if (id == R.id.export_html) { exportEmailAsHtml(); return true; }
         return super.onOptionsItemSelected(item);
+    }
+
+    /** Use Android PrintManager + WebView.createPrintDocumentAdapter to print / save as PDF. */
+    private void printEmail() {
+        if (currentMessage == null) return;
+        PrintManager printManager = (PrintManager) getSystemService(PRINT_SERVICE);
+        if (printManager == null) return;
+        String subject = getPrintableSubject();
+
+        if (printWebView != null) {
+            printWebView.destroy();
+        }
+        printWebView = new WebView(this);
+        configureWebView(printWebView);
+        printWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                PrintDocumentAdapter adapter = view.createPrintDocumentAdapter(subject);
+                printManager.print(subject, adapter, new PrintAttributes.Builder().build());
+            }
+        });
+        printWebView.loadDataWithBaseURL(null, buildEmailDocumentHtml(currentMessage), "text/html", "UTF-8", null);
+    }
+
+    /** Share the email as plain text via system share intent. */
+    private void shareEmailAsText() {
+        if (currentMessage == null) return;
+        try {
+            StringBuilder sb = new StringBuilder();
+            String subject = currentMessage.getSubject();
+            sb.append("Subject: ").append(subject != null ? subject : "(no subject)").append("\n");
+            sb.append("From: ").append(formatAddress(
+                    currentMessage.getSenderName(),
+                    currentMessage.getSenderEmailAddress())).append("\n");
+            String to = currentMessage.getDisplayTo();
+            if (to != null && !to.isEmpty()) sb.append("To: ").append(to).append("\n");
+            String cc = currentMessage.getDisplayCC();
+            if (cc != null && !cc.isEmpty()) sb.append("Cc: ").append(cc).append("\n");
+            Date date = currentMessage.getMessageDeliveryTime();
+            if (date != null) sb.append("Date: ").append(DATE_FMT.format(date)).append("\n");
+            sb.append("\n");
+            String body = currentMessage.getBody();
+            if (body == null || body.isEmpty()) body = stripHtml(currentMessage.getBodyHTML());
+            if (body != null) sb.append(body);
+
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, sb.toString());
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.action_export)));
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.export_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Export the email body and message metadata as an HTML file and share it via the system share sheet. */
+    private void exportEmailAsHtml() {
+        if (currentMessage == null) return;
+        try {
+            String subject = getPrintableSubject();
+            // Sanitise for use as filename
+            String filename = subject.replaceAll("[^a-zA-Z0-9._\\-]", "_") + ".html";
+
+            // Write to cache/exports/ and share via FileProvider (no extra permission needed)
+            File exportsDir = new File(getCacheDir(), "exports");
+            //noinspection ResultOfMethodCallIgnored
+            exportsDir.mkdirs();
+            File outFile = new File(exportsDir, filename);
+            try (OutputStreamWriter writer = new OutputStreamWriter(
+                    new FileOutputStream(outFile), StandardCharsets.UTF_8)) {
+                writer.write(buildEmailDocumentHtml(currentMessage));
+            }
+
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", outFile);
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/html");
+            shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.export_html)));
+
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.export_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String stripHtml(String html) {
+        if (html == null) return null;
+        return html.replaceAll("<[^>]+>", "").replaceAll("&nbsp;", " ").trim();
+    }
+
+    private String getPrintableSubject() {
+        try {
+            String subject = currentMessage != null ? currentMessage.getSubject() : null;
+            return subject == null || subject.isEmpty() ? "email" : subject;
+        } catch (Exception ignored) {
+            return "email";
+        }
+    }
+
+    private String buildEmailDocumentHtml(PSTMessage message) {
+        String subject = getPrintableSubject();
+        String from = "Unknown";
+        String to = null;
+        String cc = null;
+        Date date = null;
+        int attachCount = 0;
+        String htmlBody = null;
+        String plainBody = null;
+
+        try {
+            from = formatAddress(message.getSenderName(), message.getSenderEmailAddress());
+        } catch (Exception ignored) {}
+        try {
+            to = message.getDisplayTo();
+        } catch (Exception ignored) {}
+        try {
+            cc = message.getDisplayCC();
+        } catch (Exception ignored) {}
+        try {
+            date = message.getMessageDeliveryTime();
+        } catch (Exception ignored) {}
+        try {
+            attachCount = message.getNumberOfAttachments();
+        } catch (Exception ignored) {}
+        try {
+            htmlBody = message.getBodyHTML();
+        } catch (Exception ignored) {}
+        try {
+            plainBody = message.getBody();
+        } catch (Exception ignored) {}
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<!DOCTYPE html><html><head><meta charset='UTF-8'/>"
+                + "<meta name='viewport' content='width=device-width,initial-scale=1'/>"
+                + "<style>"
+                + "body{font-family:sans-serif;font-size:15px;padding:16px;}"
+                + "table{border-collapse:collapse;width:100%;margin-bottom:16px;}"
+                + "td{padding:4px 8px;vertical-align:top;}"
+                + "td.label{font-weight:bold;color:#555;width:92px;}"
+                + "hr{border:none;border-top:1px solid #ddd;margin:12px 0;}"
+                + "img{max-width:100%;height:auto;}"
+                + "pre{white-space:pre-wrap;}"
+                + "</style></head><body>");
+
+        sb.append("<table>");
+        sb.append("<tr><td class='label'>Subject:</td><td>")
+                .append(escapeHtml(subject))
+                .append("</td></tr>");
+        sb.append("<tr><td class='label'>From:</td><td>")
+                .append(escapeHtml(from))
+                .append("</td></tr>");
+        if (to != null && !to.isEmpty()) {
+            sb.append("<tr><td class='label'>To:</td><td>")
+                    .append(escapeHtml(to)).append("</td></tr>");
+        }
+        if (cc != null && !cc.isEmpty()) {
+            sb.append("<tr><td class='label'>Cc:</td><td>")
+                    .append(escapeHtml(cc)).append("</td></tr>");
+        }
+        if (date != null) {
+            sb.append("<tr><td class='label'>Date:</td><td>")
+                    .append(escapeHtml(DATE_FMT.format(date))).append("</td></tr>");
+        }
+        if (attachCount > 0) {
+            sb.append("<tr><td class='label'>Attachments:</td><td>");
+            for (int i = 0; i < attachCount; i++) {
+                try {
+                    PSTAttachment attachment = message.getAttachment(i);
+                    String filename = attachment.getLongFilename();
+                    if (filename == null || filename.isEmpty()) filename = attachment.getFilename();
+                    if (filename == null || filename.isEmpty()) filename = "attachment_" + i;
+                    sb.append(escapeHtml(filename));
+                    if (i < attachCount - 1) sb.append(", ");
+                } catch (Exception ignored) {}
+            }
+            sb.append("</td></tr>");
+        }
+        sb.append("</table><hr/>");
+
+        if (htmlBody != null && !htmlBody.isEmpty()) {
+            sb.append(htmlBody);
+        } else {
+            if (plainBody == null || plainBody.isEmpty()) plainBody = "(empty message)";
+            sb.append("<pre>").append(escapeHtml(plainBody)).append("</pre>");
+        }
+        sb.append("</body></html>");
+        return sb.toString();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (printWebView != null) {
+            printWebView.destroy();
+            printWebView = null;
+        }
+        if (webView != null) {
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
     }
 }
