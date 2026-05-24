@@ -301,7 +301,7 @@ public class EmailDetailActivity extends AppCompatActivity {
         }
     }
 
-    /** Export the email as a self-contained HTML file and share via the system share sheet. */
+    /** Export the email body and message metadata as an HTML file and share it via the system share sheet. */
     private void exportEmailAsHtml() {
         if (currentMessage == null) return;
         try {
@@ -352,7 +352,7 @@ public class EmailDetailActivity extends AppCompatActivity {
                 sb.append("<tr><td class='label'>Attachments:</td><td>");
                 for (int i = 0; i < attachCount; i++) {
                     try {
-                        com.pff.PSTAttachment att = currentMessage.getAttachment(i);
+                        PSTAttachment att = currentMessage.getAttachment(i);
                         String fn = att.getLongFilename();
                         if (fn == null || fn.isEmpty()) fn = att.getFilename();
                         if (fn == null || fn.isEmpty()) fn = "attachment_" + i;
@@ -402,38 +402,4 @@ public class EmailDetailActivity extends AppCompatActivity {
         if (html == null) return null;
         return html.replaceAll("<[^>]+>", "").replaceAll("&nbsp;", " ").trim();
     }
-
-    private String wrapHtml(String body) {
-        return "<!DOCTYPE html><html><head><meta charset='UTF-8'/>"
-                + "<meta name='viewport' content='width=device-width,initial-scale=1'/>"
-                + "<style>body{font-family:sans-serif;font-size:15px;padding:8px;}"
-                + "img{max-width:100%;height:auto;}</style></head><body>"
-                + body + "</body></html>";
-    }
-
-    private String escapeHtml(String text) {
-        return text.replace("&", "&amp;").replace("<", "&lt;")
-                   .replace(">", "&gt;").replace("\"", "&quot;");
-    }
-
-    private String formatAddress(String name, String email) {
-        if (name != null && !name.isEmpty()) {
-            if (email != null && !email.isEmpty() && !email.equals(name)) {
-                return name + " <" + email + ">";
-            }
-            return name;
-        }
-        return email != null ? email : "Unknown";
-    }
-
-    private String formatSize(long bytes) {
-        if (bytes < 1024) return bytes + " B";
-        if (bytes < 1024 * 1024) return String.format(Locale.US, "%.1f KB", bytes / 1024.0);
-        return String.format(Locale.US, "%.1f MB", bytes / (1024.0 * 1024));
-    }
-
-    private int dp(int value) {
-        return (int) (value * getResources().getDisplayMetrics().density);
-    }
 }
-

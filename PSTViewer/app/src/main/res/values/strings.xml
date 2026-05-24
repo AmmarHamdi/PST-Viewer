@@ -12,12 +12,13 @@
     <string name="no_subject">(no subject)</string>
     <string name="unknown_sender">Unknown sender</string>
     <string name="empty_message">(empty message)</string>
-    <string name="loading_folders">Loading folders…</string>
+    <string name="search_folders">Search folders…</string>
+    <string name="no_folders_found">No folders match your search</string>
     <string name="loading_messages">Loading messages…</string>
     <string name="open_with">Open with</string>
     <string name="sort">Sort</string>
-    <string name="sort_date_newest">Date (newest first)</string>
-    <string name="sort_date_oldest">Date (oldest first)</string>
+    <string name="sort_newest_first">Newest first</string>
+    <string name="sort_oldest_first">Oldest first</string>
     <string name="sort_sender">Sender (A–Z)</string>
     <string name="sort_subject">Subject (A–Z)</string>
     <string name="action_print">Print / Save PDF</string>

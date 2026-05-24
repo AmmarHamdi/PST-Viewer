@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +21,7 @@ import com.pff.PSTFolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -32,6 +34,7 @@ public class FolderActivity extends AppCompatActivity implements FolderAdapter.O
     private ProgressBar progressBar;
     private TextView tvEmpty;
     private FolderAdapter adapter;
+    private List<PSTRepository.FolderItem> allItems = new ArrayList<>();
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -51,6 +54,12 @@ public class FolderActivity extends AppCompatActivity implements FolderAdapter.O
         recyclerView = findViewById(R.id.recyclerFolders);
         progressBar  = findViewById(R.id.progressBar);
         tvEmpty      = findViewById(R.id.tvEmpty);
+
+        SearchView searchView = findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override public boolean onQueryTextSubmit(String q)  { filter(q); return true; }
+            @Override public boolean onQueryTextChange(String q)  { filter(q); return true; }
+        });
 
         adapter = new FolderAdapter(this, new ArrayList<>(), this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -84,6 +93,7 @@ public class FolderActivity extends AppCompatActivity implements FolderAdapter.O
             final List<PSTRepository.FolderItem> finalItems = items;
             mainHandler.post(() -> {
                 progressBar.setVisibility(View.GONE);
+                allItems = finalItems;
                 if (finalItems.isEmpty()) {
                     tvEmpty.setVisibility(View.VISIBLE);
                 } else {
@@ -91,6 +101,23 @@ public class FolderActivity extends AppCompatActivity implements FolderAdapter.O
                 }
             });
         });
+    }
+
+    private void filter(String query) {
+        if (query == null || query.isEmpty()) {
+            adapter.setItems(allItems);
+            tvEmpty.setVisibility(allItems.isEmpty() ? View.VISIBLE : View.GONE);
+            return;
+        }
+        String q = query.toLowerCase(Locale.getDefault());
+        List<PSTRepository.FolderItem> filtered = new ArrayList<>();
+        for (PSTRepository.FolderItem item : allItems) {
+            if (item.getDisplayName().toLowerCase(Locale.getDefault()).contains(q)) {
+                filtered.add(item);
+            }
+        }
+        adapter.setItems(filtered);
+        tvEmpty.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     @Override

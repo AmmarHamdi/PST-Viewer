@@ -6,16 +6,15 @@
         android:id="@+id/action_sort"
         android:title="@string/sort"
         app:showAsAction="always">
-
         <menu>
             <group android:checkableBehavior="single">
                 <item
-                    android:id="@+id/sort_date_newest"
-                    android:title="@string/sort_date_newest"
+                    android:id="@+id/sort_date_desc"
+                    android:title="@string/sort_newest_first"
                     android:checked="true" />
                 <item
-                    android:id="@+id/sort_date_oldest"
-                    android:title="@string/sort_date_oldest" />
+                    android:id="@+id/sort_date_asc"
+                    android:title="@string/sort_oldest_first" />
                 <item
                     android:id="@+id/sort_sender"
                     android:title="@string/sort_sender" />
