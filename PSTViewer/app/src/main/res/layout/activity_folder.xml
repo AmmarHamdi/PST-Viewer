@@ -17,6 +17,15 @@
             android:background="@color/primary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/surface"
+            android:padding="8dp"
+            app:queryHint="@string/search_folders"
+            xmlns:app="http://schemas.android.com/apk/res-auto" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <ProgressBar
