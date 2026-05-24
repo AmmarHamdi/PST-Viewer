@@ -1,18 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#0078D4</color>
-    <color name="primary_dark">#005A9E</color>
-    <color name="primary_light">#C7E0F4</color>
-    <color name="accent">#0078D4</color>
+    <!-- Brand / primary palette: deep indigo -->
+    <color name="primary">#3949AB</color>
+    <color name="primary_dark">#1A237E</color>
+    <color name="primary_light">#9FA8DA</color>
+    <color name="primary_ultra_light">#E8EAF6</color>
 
-    <color name="background">#F5F5F5</color>
+    <!-- Secondary accent: vivid deep-orange -->
+    <color name="accent">#FF7043</color>
+    <color name="accent_dark">#E64A19</color>
+
+    <!-- Backgrounds -->
+    <color name="background">#EEF2FF</color>
     <color name="surface">#FFFFFF</color>
-    <color name="divider">#E0E0E0</color>
+    <color name="surface_variant">#F3F4FF</color>
 
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
-    <color name="text_hint">#BDBDBD</color>
+    <!-- Dividers / separators -->
+    <color name="divider">#DDE1F5</color>
 
-    <color name="unread_indicator">#0078D4</color>
-    <color name="badge_background">#E3F2FD</color>
+    <!-- Text -->
+    <color name="text_primary">#1A1E3C</color>
+    <color name="text_secondary">#5C6BC0</color>
+    <color name="text_body">#424242</color>
+    <color name="text_hint">#B0B8DC</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <!-- Unread indicator and badges -->
+    <color name="unread_indicator">#FF7043</color>
+    <color name="badge_background">#E8EAF6</color>
+    <color name="badge_text">#3949AB</color>
+
+    <!-- Splash screen gradient -->
+    <color name="splash_gradient_start">#0D1B6B</color>
+    <color name="splash_gradient_end">#4A5CC8</color>
+
+    <!-- Colorful avatar palette (cycles by sender initial) -->
+    <color name="avatar_0">#E53935</color>
+    <color name="avatar_1">#8E24AA</color>
+    <color name="avatar_2">#1E88E5</color>
+    <color name="avatar_3">#00897B</color>
+    <color name="avatar_4">#F4511E</color>
+    <color name="avatar_5">#039BE5</color>
+    <color name="avatar_6">#7CB342</color>
+    <color name="avatar_7">#FB8C00</color>
+    <color name="avatar_8">#D81B60</color>
+    <color name="avatar_9">#5E35B1</color>
 </resources>

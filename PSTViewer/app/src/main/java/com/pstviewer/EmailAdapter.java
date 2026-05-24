@@ -1,12 +1,14 @@
 package com.pstviewer;
 
 import android.content.Context;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pff.PSTMessage;
@@ -21,6 +23,14 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
     public interface OnEmailClickListener {
         void onEmailClick(PSTMessage message);
     }
+
+    /** Avatar background colors, cycled by the sender initial's char code. */
+    private static final int[] AVATAR_COLOR_RES = {
+            R.color.avatar_0, R.color.avatar_1, R.color.avatar_2,
+            R.color.avatar_3, R.color.avatar_4, R.color.avatar_5,
+            R.color.avatar_6, R.color.avatar_7, R.color.avatar_8,
+            R.color.avatar_9
+    };
 
     private final Context context;
     private List<PSTMessage> items;
@@ -57,9 +67,12 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
             if (sender == null) sender = "?";
             holder.tvSender.setText(sender);
 
-            // Avatar – first letter of sender name
-            String initial = sender.trim().isEmpty() ? "?" : sender.trim().substring(0, 1).toUpperCase(Locale.getDefault());
+            // Avatar – first letter + color
+            String initial = sender.trim().isEmpty()
+                    ? "?"
+                    : sender.trim().substring(0, 1).toUpperCase(Locale.getDefault());
             holder.tvAvatar.setText(initial);
+            setAvatarColor(holder.tvAvatar, initial);
 
             // Subject
             String subject = msg.getSubject();
@@ -67,11 +80,7 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
 
             // Date
             Date date = msg.getMessageDeliveryTime();
-            if (date != null) {
-                holder.tvDate.setText(DATE_FMT.format(date));
-            } else {
-                holder.tvDate.setText("");
-            }
+            holder.tvDate.setText(date != null ? DATE_FMT.format(date) : "");
 
             // Preview of body
             String body = msg.getBodyPrefix();
@@ -95,7 +104,7 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
                 holder.tvAttachment.setVisibility(View.GONE);
             }
 
-            // Unread styling: bold subject + blue stripe + bold sender
+            // Unread styling: bold subject + orange stripe + bold sender
             boolean read = msg.isRead();
             if (!read) {
                 holder.tvSubject.setTypeface(null, android.graphics.Typeface.BOLD);
@@ -116,6 +125,17 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() { return items.size(); }
+
+    /** Set a deterministic color on the avatar circle based on the sender initial. */
+    private void setAvatarColor(TextView avatarView, String initial) {
+        int index = initial.isEmpty() ? 0 : Math.abs(initial.charAt(0)) % AVATAR_COLOR_RES.length;
+        int color = ContextCompat.getColor(context, AVATAR_COLOR_RES[index]);
+        // Mutate a copy of the background drawable to avoid tinting all items
+        GradientDrawable bg = new GradientDrawable();
+        bg.setShape(GradientDrawable.OVAL);
+        bg.setColor(color);
+        avatarView.setBackground(bg);
+    }
 
     private static String stripHtml(String html) {
         if (html == null) return null;
@@ -139,3 +159,4 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
         }
     }
 }
+
