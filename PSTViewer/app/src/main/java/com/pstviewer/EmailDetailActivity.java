@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
@@ -178,7 +179,9 @@ public class EmailDetailActivity extends AppCompatActivity {
             chip.setLayoutParams(lp);
 
             final String finalFilename = filename;
-            chip.setOnClickListener(v -> saveAndOpenAttachment(att, finalFilename));
+            chip.setOnClickListener(v -> {
+                if (requirePro()) saveAndOpenAttachment(att, finalFilename);
+            });
             container.addView(chip);
         } catch (Exception ignored) {}
     }
@@ -249,9 +252,18 @@ public class EmailDetailActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) { onBackPressed(); return true; }
-        if (id == R.id.action_print) { printEmail(); return true; }
-        if (id == R.id.export_share_text) { shareEmailAsText(); return true; }
-        if (id == R.id.export_html) { exportEmailAsHtml(); return true; }
+        if (id == R.id.action_print) {
+            if (requirePro()) printEmail();
+            return true;
+        }
+        if (id == R.id.export_share_text) {
+            if (requirePro()) shareEmailAsText();
+            return true;
+        }
+        if (id == R.id.export_html) {
+            if (requirePro()) exportEmailAsHtml();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -441,6 +453,21 @@ public class EmailDetailActivity extends AppCompatActivity {
         }
         sb.append("</body></html>");
         return sb.toString();
+    }
+
+    /**
+     * Returns true if the user has Pro, otherwise shows the upgrade dialog and returns false.
+     */
+    private boolean requirePro() {
+        if (ProManager.getInstance(this).isPro()) return true;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.pro_gate_title)
+                .setMessage(R.string.pro_gate_message)
+                .setPositiveButton(R.string.pro_gate_upgrade, (d, w) ->
+                        startActivity(new Intent(this, UpgradeActivity.class)))
+                .setNegativeButton(R.string.pro_gate_cancel, null)
+                .show();
+        return false;
     }
 
     @Override

@@ -6,6 +6,10 @@
         android:maxSdkVersion="32" />
     <!-- On Android 13+ we need READ_MEDIA_* or use SAF (Storage Access Framework) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Google Play In-App Purchases -->
+    <uses-permission android:name="com.android.vending.BILLING" />
+    <!-- Network access required by the billing library -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -64,6 +68,13 @@
             android:name=".EmailDetailActivity"
             android:label="@string/email_detail"
             android:parentActivityName=".EmailListActivity" />
+
+        <!-- Pro upgrade screen -->
+        <activity
+            android:name=".UpgradeActivity"
+            android:label="@string/upgrade_title"
+            android:parentActivityName=".MainActivity"
+            android:exported="false" />
 
         <!-- FileProvider for sharing attachment files to other apps -->
         <provider

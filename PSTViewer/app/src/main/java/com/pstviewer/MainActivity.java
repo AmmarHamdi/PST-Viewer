@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private Button btnOpen;
     private Button btnBrowse;
+    private Button btnUpgrade;
     private MaterialCardView cardInfo;
     private TextView tvFileName;
     private TextView tvFileSize;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         btnOpen     = findViewById(R.id.btnOpen);
         btnBrowse   = findViewById(R.id.btnBrowse);
+        btnUpgrade  = findViewById(R.id.btnUpgrade);
         cardInfo    = findViewById(R.id.cardInfo);
         tvFileName  = findViewById(R.id.tvFileName);
         tvFileSize  = findViewById(R.id.tvFileSize);
@@ -69,6 +71,14 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please open a PST file first", Toast.LENGTH_SHORT).show();
             }
         });
+
+        btnUpgrade.setOnClickListener(v ->
+                startActivity(new Intent(this, UpgradeActivity.class)));
+
+        // Hide upgrade button if user is already Pro
+        if (ProManager.getInstance(this).isPro()) {
+            btnUpgrade.setVisibility(View.GONE);
+        }
 
         // Handle VIEW intent (opened from a file manager)
         Intent intent = getIntent();
@@ -146,6 +156,15 @@ public class MainActivity extends AppCompatActivity {
         if (bytes < 1024 * 1024) return String.format("%.1f KB", bytes / 1024.0);
         if (bytes < 1024L * 1024 * 1024) return String.format("%.1f MB", bytes / (1024.0 * 1024));
         return String.format("%.2f GB", bytes / (1024.0 * 1024 * 1024));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh Pro button visibility in case user just completed a purchase
+        if (btnUpgrade != null && ProManager.getInstance(this).isPro()) {
+            btnUpgrade.setVisibility(View.GONE);
+        }
     }
 
     @Override
