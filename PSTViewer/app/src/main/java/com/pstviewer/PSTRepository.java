@@ -81,7 +81,7 @@ public class PSTRepository {
         List<PSTMessage> messages = new ArrayList<>();
         try {
             if (folder.getContentCount() > 0) {
-                folder.moveToMinimumId();
+                folder.moveChildCursorTo(0);
                 PSTMessage message;
                 while ((message = (PSTMessage) folder.getNextChild()) != null) {
                     messages.add(message);
