@@ -5,7 +5,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,7 +19,7 @@ public class UpgradeActivity extends AppCompatActivity implements BillingManager
     private Button btnBuy;
     private Button btnRestore;
     private ProgressBar progressBar;
-    private TextView tvAlreadyPro;
+    private View tvAlreadyPro;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

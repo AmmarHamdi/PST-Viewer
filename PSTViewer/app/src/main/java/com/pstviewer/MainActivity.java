@@ -99,14 +99,39 @@ public class MainActivity extends AppCompatActivity {
 
         executor.execute(() -> {
             try {
-                // Copy the URI content to a temp file (java-libpst needs a real File path)
+                // Determine file size for progress display (best-effort via ContentResolver)
+                long fileSize = -1;
+                try (android.database.Cursor cursor = getContentResolver().query(
+                        uri,
+                        new String[]{android.provider.OpenableColumns.SIZE},
+                        null, null, null)) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        int sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+                        if (sizeIndex != -1 && !cursor.isNull(sizeIndex)) {
+                            fileSize = cursor.getLong(sizeIndex);
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                // Copy the URI content to a temp file (java-libpst needs a real File path).
+                // Use a 1 MB buffer to handle large archives efficiently.
                 File tempFile = new File(getCacheDir(), "archive_" + System.currentTimeMillis() + ".pst");
                 try (InputStream in = getContentResolver().openInputStream(uri);
                      FileOutputStream out = new FileOutputStream(tempFile)) {
                     if (in == null) throw new Exception("Cannot open input stream");
-                    byte[] buf = new byte[8192];
+                    byte[] buf = new byte[1024 * 1024]; // 1 MB buffer
+                    long copied = 0;
                     int read;
-                    while ((read = in.read(buf)) != -1) out.write(buf, 0, read);
+                    final long totalBytes = fileSize;
+                    while ((read = in.read(buf)) != -1) {
+                        out.write(buf, 0, read);
+                        copied += read;
+                        if (totalBytes > 0) {
+                            final int pct = (int) (copied * 100 / totalBytes);
+                            mainHandler.post(() -> setLoading(true,
+                                    "Copying file… " + pct + "%"));
+                        }
+                    }
                 }
 
                 mainHandler.post(() -> setLoading(true, "Parsing PST…"));
