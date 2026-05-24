@@ -154,8 +154,6 @@
                 android:orientation="horizontal"
                 android:padding="12dp"
                 android:paddingTop="0dp"
-                android:flexDirection="row"
-                android:flexWrap="wrap"
                 android:visibility="gone" />
 
             <!-- Body WebView -->
