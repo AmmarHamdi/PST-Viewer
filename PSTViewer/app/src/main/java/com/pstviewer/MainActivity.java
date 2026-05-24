@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private Button btnOpen;
     private Button btnBrowse;
+    private Button btnUpgrade;
     private MaterialCardView cardInfo;
     private TextView tvFileName;
     private TextView tvFileSize;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         btnOpen     = findViewById(R.id.btnOpen);
         btnBrowse   = findViewById(R.id.btnBrowse);
+        btnUpgrade  = findViewById(R.id.btnUpgrade);
         cardInfo    = findViewById(R.id.cardInfo);
         tvFileName  = findViewById(R.id.tvFileName);
         tvFileSize  = findViewById(R.id.tvFileSize);
@@ -69,6 +71,14 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Please open a PST file first", Toast.LENGTH_SHORT).show();
             }
         });
+
+        btnUpgrade.setOnClickListener(v ->
+                startActivity(new Intent(this, UpgradeActivity.class)));
+
+        // Hide upgrade button if user is already Pro
+        if (ProManager.getInstance(this).isPro()) {
+            btnUpgrade.setVisibility(View.GONE);
+        }
 
         // Handle VIEW intent (opened from a file manager)
         Intent intent = getIntent();
@@ -89,14 +99,39 @@ public class MainActivity extends AppCompatActivity {
 
         executor.execute(() -> {
             try {
-                // Copy the URI content to a temp file (java-libpst needs a real File path)
+                // Determine file size for progress display (best-effort via ContentResolver)
+                long fileSize = -1;
+                try (android.database.Cursor cursor = getContentResolver().query(
+                        uri,
+                        new String[]{android.provider.OpenableColumns.SIZE},
+                        null, null, null)) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        int sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+                        if (sizeIndex != -1 && !cursor.isNull(sizeIndex)) {
+                            fileSize = cursor.getLong(sizeIndex);
+                        }
+                    }
+                } catch (Exception ignored) {}
+
+                // Copy the URI content to a temp file (java-libpst needs a real File path).
+                // Use a 1 MB buffer to handle large archives efficiently.
                 File tempFile = new File(getCacheDir(), "archive_" + System.currentTimeMillis() + ".pst");
                 try (InputStream in = getContentResolver().openInputStream(uri);
                      FileOutputStream out = new FileOutputStream(tempFile)) {
                     if (in == null) throw new Exception("Cannot open input stream");
-                    byte[] buf = new byte[8192];
+                    byte[] buf = new byte[1024 * 1024]; // 1 MB buffer
+                    long copied = 0;
                     int read;
-                    while ((read = in.read(buf)) != -1) out.write(buf, 0, read);
+                    final long totalBytes = fileSize;
+                    while ((read = in.read(buf)) != -1) {
+                        out.write(buf, 0, read);
+                        copied += read;
+                        if (totalBytes > 0) {
+                            final int pct = (int) (copied * 100 / totalBytes);
+                            mainHandler.post(() -> setLoading(true,
+                                    "Copying file… " + pct + "%"));
+                        }
+                    }
                 }
 
                 mainHandler.post(() -> setLoading(true, "Parsing PST…"));
@@ -146,6 +181,15 @@ public class MainActivity extends AppCompatActivity {
         if (bytes < 1024 * 1024) return String.format("%.1f KB", bytes / 1024.0);
         if (bytes < 1024L * 1024 * 1024) return String.format("%.1f MB", bytes / (1024.0 * 1024));
         return String.format("%.2f GB", bytes / (1024.0 * 1024 * 1024));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh Pro button visibility in case user just completed a purchase
+        if (btnUpgrade != null && ProManager.getInstance(this).isPro()) {
+            btnUpgrade.setVisibility(View.GONE);
+        }
     }
 
     @Override

@@ -31,4 +31,28 @@
     <string name="export_failed">Export failed: %s</string>
     <string name="hero_subtitle">Open and browse Outlook PST archives with ease</string>
     <string name="file_loaded_ok">Archive loaded successfully ✓</string>
+
+    <!-- ── Pro / Upgrade strings ── -->
+    <string name="upgrade_title">Upgrade to Pro</string>
+    <string name="upgrade_subtitle">One-time purchase — unlock all power features</string>
+    <string name="upgrade_features_header">What you get with Pro</string>
+    <string name="upgrade_feature_attachments">Open Attachments</string>
+    <string name="upgrade_feature_attachments_desc">Tap any attachment to open it in another app</string>
+    <string name="upgrade_feature_export">Export Emails</string>
+    <string name="upgrade_feature_export_desc">Share as plain text or save as an HTML file</string>
+    <string name="upgrade_feature_print">Print / Save as PDF</string>
+    <string name="upgrade_feature_print_desc">Use Android Print to produce professional PDFs</string>
+    <string name="upgrade_feature_one_time">One-time Purchase</string>
+    <string name="upgrade_feature_one_time_desc">Pay once, use forever — no subscription</string>
+    <string name="upgrade_buy_button">Unlock Pro</string>
+    <string name="upgrade_restore">Restore Previous Purchase</string>
+    <string name="upgrade_success">🎉 You\'re now a Pro user! Thank you for your support.</string>
+    <string name="upgrade_failed">Purchase failed: %s</string>
+    <string name="upgrade_already_pro">✅ You already have Pro — enjoy all features!</string>
+    <string name="billing_unavailable">Google Play is not available. Please try again later.</string>
+    <string name="pro_gate_title">Pro Feature</string>
+    <string name="pro_gate_message">This feature requires PST Viewer Pro. Upgrade once to unlock attachments, export, and print for all your archives.</string>
+    <string name="pro_gate_upgrade">Upgrade</string>
+    <string name="pro_gate_cancel">Not now</string>
+    <string name="menu_upgrade_pro">Upgrade to Pro ⭐</string>
 </resources>
