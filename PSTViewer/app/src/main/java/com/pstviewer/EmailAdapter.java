@@ -51,14 +51,19 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
         PSTMessage msg = items.get(position);
 
         try {
-            // Subject
-            String subject = msg.getSubject();
-            holder.tvSubject.setText(subject != null && !subject.isEmpty() ? subject : "(no subject)");
-
             // Sender
             String sender = msg.getSenderName();
             if (sender == null || sender.isEmpty()) sender = msg.getSenderEmailAddress();
-            holder.tvSender.setText(sender != null ? sender : "Unknown sender");
+            if (sender == null) sender = "?";
+            holder.tvSender.setText(sender);
+
+            // Avatar – first letter of sender name
+            String initial = sender.trim().isEmpty() ? "?" : sender.trim().substring(0, 1).toUpperCase(Locale.getDefault());
+            holder.tvAvatar.setText(initial);
+
+            // Subject
+            String subject = msg.getSubject();
+            holder.tvSubject.setText(subject != null && !subject.isEmpty() ? subject : "(no subject)");
 
             // Date
             Date date = msg.getMessageDeliveryTime();
@@ -74,7 +79,6 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
                 body = stripHtml(msg.getBodyHTML());
             }
             if (body != null && !body.isEmpty()) {
-                // trim to first 120 chars
                 body = body.trim().replace('\n', ' ').replace('\r', ' ');
                 if (body.length() > 120) body = body.substring(0, 120) + "…";
                 holder.tvPreview.setText(body);
@@ -91,12 +95,17 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
                 holder.tvAttachment.setVisibility(View.GONE);
             }
 
-            // Unread styling
+            // Unread styling: bold subject + blue stripe + bold sender
             boolean read = msg.isRead();
-            holder.tvSubject.setAlpha(read ? 0.75f : 1.0f);
-            holder.tvSubject.setTypeface(null, read
-                    ? android.graphics.Typeface.NORMAL
-                    : android.graphics.Typeface.BOLD);
+            if (!read) {
+                holder.tvSubject.setTypeface(null, android.graphics.Typeface.BOLD);
+                holder.tvSender.setTypeface(null, android.graphics.Typeface.BOLD);
+                holder.viewUnreadIndicator.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvSubject.setTypeface(null, android.graphics.Typeface.NORMAL);
+                holder.tvSender.setTypeface(null, android.graphics.Typeface.NORMAL);
+                holder.viewUnreadIndicator.setVisibility(View.GONE);
+            }
 
         } catch (Exception e) {
             holder.tvSubject.setText("(error loading message)");
@@ -114,10 +123,14 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.ViewHolder> 
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        final View viewUnreadIndicator;
+        final TextView tvAvatar;
         final TextView tvSender, tvSubject, tvDate, tvPreview, tvAttachment;
 
         ViewHolder(View v) {
             super(v);
+            viewUnreadIndicator = v.findViewById(R.id.viewUnreadIndicator);
+            tvAvatar     = v.findViewById(R.id.tvAvatar);
             tvSender     = v.findViewById(R.id.tvSender);
             tvSubject    = v.findViewById(R.id.tvSubject);
             tvDate       = v.findViewById(R.id.tvDate);
