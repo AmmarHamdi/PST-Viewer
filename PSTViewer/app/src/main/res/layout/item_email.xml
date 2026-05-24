@@ -4,58 +4,62 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
+    android:layout_marginStart="10dp"
+    android:layout_marginEnd="10dp"
     android:layout_marginTop="4dp"
     android:layout_marginBottom="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="1dp"
-    app:rippleColor="@color/primary_light">
+    app:cardCornerRadius="14dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/surface"
+    app:rippleColor="@color/primary_ultra_light">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:minHeight="64dp">
+        android:minHeight="72dp"
+        android:gravity="center_vertical">
 
         <!-- Unread indicator stripe -->
         <View
             android:id="@+id/viewUnreadIndicator"
             android:layout_width="4dp"
             android:layout_height="match_parent"
-            android:background="@color/primary"
+            android:minHeight="72dp"
+            android:background="@color/unread_indicator"
             android:visibility="gone" />
 
-        <!-- Sender avatar -->
+        <!-- Sender avatar circle -->
         <TextView
             android:id="@+id/tvAvatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="14dp"
             android:layout_marginEnd="12dp"
             android:gravity="center"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/primary"
+            android:textColor="#FFFFFF"
             android:background="@drawable/bg_avatar" />
 
-        <!-- Email content -->
+        <!-- Email text content -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="center_vertical"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:paddingEnd="12dp">
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:paddingEnd="14dp">
 
             <!-- Row 1: sender + date -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="2dp">
+                android:gravity="center_vertical"
+                android:layout_marginBottom="3dp">
 
                 <TextView
                     android:id="@+id/tvSender"
@@ -74,7 +78,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="11sp"
                     android:textColor="@color/text_secondary"
-                    android:layout_marginStart="8dp" />
+                    android:layout_marginStart="10dp" />
             </LinearLayout>
 
             <!-- Row 2: subject + attachment icon -->
@@ -82,7 +86,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="2dp">
+                android:gravity="center_vertical"
+                android:layout_marginBottom="3dp">
 
                 <TextView
                     android:id="@+id/tvSubject"
@@ -90,7 +95,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textSize="13sp"
-                    android:textColor="@color/text_primary"
+                    android:textColor="@color/text_body"
                     android:maxLines="1"
                     android:ellipsize="end" />
 
@@ -99,7 +104,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="11sp"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="@color/accent"
                     android:layout_marginStart="8dp"
                     android:visibility="gone" />
             </LinearLayout>
@@ -118,3 +123,4 @@
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
+
