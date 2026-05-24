@@ -15,4 +15,14 @@
     <string name="loading_folders">Loading folders…</string>
     <string name="loading_messages">Loading messages…</string>
     <string name="open_with">Open with</string>
+    <string name="sort">Sort</string>
+    <string name="sort_date_newest">Date (newest first)</string>
+    <string name="sort_date_oldest">Date (oldest first)</string>
+    <string name="sort_sender">Sender (A–Z)</string>
+    <string name="sort_subject">Subject (A–Z)</string>
+    <string name="action_print">Print / Save PDF</string>
+    <string name="action_export">Export</string>
+    <string name="export_share_text">Share as text</string>
+    <string name="export_html">Save HTML file</string>
+    <string name="export_failed">Export failed: %s</string>
 </resources>
